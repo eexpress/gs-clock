@@ -3,6 +3,7 @@ function lg(s){log("==="+GETTEXT_DOMAIN+"===>"+s)};
 
 imports.cairo.versions = '1.0';
 const Cairo = imports.cairo;
+ //~ How to determine the version of the imported module? Like `Gdk` or `cairo`.
 
 imports.gi.versions.Gdk = '4.4';
 const { GObject, Clutter, Gdk, St } = imports.gi;
@@ -20,10 +21,10 @@ const size = 320;
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
 	_init() {
-		super._init(0.0, _('My Shiny Indicator'));
+		super._init(0.0, _('Cairo Clock'));
 
 		this.add_child(new St.Icon({
-			icon_name: 'face-smile-symbolic',
+			icon_name: 'gnome-panel-clock',
 			style_class: 'system-status-icon',
 		}));
 
@@ -42,6 +43,7 @@ class Indicator extends PanelMenu.Button {
 		//~ Cairo.TextExtents ex;
 		//~ let ex = Cairo.TextExtents.textExtents(showtext);
 		//~ let ex = new Cairo.TextExtents();	// Cairo.TextExtents is not a constructor
+//~ Where is the cairo.js source code? I got msg: `Cairo.TextExtents is not a constructor`.
 		//~ ctx.textExtents (showtext, ex);
 		//~ ctx.relMoveTo(-ex.width/2,ex.height/2);
 		ctx.relMoveTo(-4,0);
@@ -50,6 +52,7 @@ class Indicator extends PanelMenu.Button {
 
 	setcolor(ctx, colorstr, alpha){
 		//~ const cc = Clutter.Color.from_string(colorstr);
+//~ Need a example of `Clutter.Color.from_string`.
 		const cc = new Gdk.RGBA();
 		cc.parse(colorstr);
 		ctx.setSourceRGBA(cc.red, cc.green, cc.blue, alpha);
