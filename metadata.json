@@ -1,0 +1,8 @@
+{
+  "name": "Cairo Clock",
+  "description": "Cairo Clock",
+  "uuid": "cairo@eexpss.gmail.com",
+  "shell-version": [
+    "40","41","42"
+  ]
+}
