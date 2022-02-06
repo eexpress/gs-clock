@@ -3,10 +3,8 @@ function lg(s){log("==="+GETTEXT_DOMAIN+"===>"+s)};
 
 imports.cairo.versions = '1.0';
 const Cairo = imports.cairo;
- //~ How to determine the version of the imported module? Like `Gdk` or `cairo`.
 
-imports.gi.versions.Gdk = '4.4';
-const { GObject, Clutter, Gdk, St } = imports.gi;
+const { GObject, Clutter, St, PangoCairo, Pango } = imports.gi;
 
 const Gettext = imports.gettext.domain(GETTEXT_DOMAIN);
 const _ = Gettext.gettext;
@@ -16,7 +14,7 @@ const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
-const size = 320;
+const size = 400;
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
@@ -38,23 +36,23 @@ class Indicator extends PanelMenu.Button {
 		this.menu.addMenuItem(item);
 	}
 
-	align_show(ctx, showtext, size){
-		ctx.setFontSize(size);
-		//~ Cairo.TextExtents ex;
-		//~ let ex = Cairo.TextExtents.textExtents(showtext);
-		//~ let ex = new Cairo.TextExtents();	// Cairo.TextExtents is not a constructor
-//~ Where is the cairo.js source code? I got msg: `Cairo.TextExtents is not a constructor`.
+	align_show(ctx, showtext){
+		//~ let ex = new Cairo.TextExtents();	// APi没有绑定这个函数。 Cairo.TextExtents is not a constructor
 		//~ ctx.textExtents (showtext, ex);
 		//~ ctx.relMoveTo(-ex.width/2,ex.height/2);
-		ctx.relMoveTo(-4,0);
-		ctx.showText(showtext);
+		//~ ctx.showText(showtext);
+		let pl = PangoCairo.create_layout(ctx);
+		pl.set_text(showtext, -1);
+		pl.set_font_description(Pango.FontDescription.from_string("Sans Bold 20"));
+		PangoCairo.update_layout(ctx, pl);
+		let [w,h] = pl.get_pixel_size();
+		ctx.relMoveTo(-w/2,0);
+		PangoCairo.show_layout (ctx, pl);
+		ctx.relMoveTo(w/2,0);
 	}
 
 	setcolor(ctx, colorstr, alpha){
-		//~ const cc = Clutter.Color.from_string(colorstr);
-//~ Need a example of `Clutter.Color.from_string`.
-		const cc = new Gdk.RGBA();
-		cc.parse(colorstr);
+		const [,cc] = Clutter.Color.from_string(colorstr);
 		ctx.setSourceRGBA(cc.red, cc.green, cc.blue, alpha);
 	};
 
@@ -65,16 +63,13 @@ class Indicator extends PanelMenu.Button {
 		const MAX = size/2-size/12;
 
 		let ctx = area.get_context();
-
-		//~ ctx.rectangle (0, 0, size, size);
-		//~ this.setcolor(ctx, 'white', 0.8);
-		//~ ctx.fill();
+		//~ ctx.selectFontFace("Sans Bold 27", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
 
 		ctx.translate(size/2, size/2);	//窗口中心为坐标原点。
 		ctx.setLineCap (Cairo.LineCap.ROUND);
 		ctx.setOperator (Cairo.Operator.SOURCE);
-//---------------------底色
-		this.setcolor(ctx, back_color, 0.8);
+
+		this.setcolor(ctx, back_color, 0.8);	//底色
 		ctx.arc(0,0,size/2-size/20,0,2*Math.PI);
 		ctx.fill();
 		ctx.setLineWidth(size/100);
@@ -85,20 +80,16 @@ class Indicator extends PanelMenu.Button {
 		this.setcolor(ctx, 'white', 1);
 		ctx.arc(0,0,size/2-size/7.5,0,2*Math.PI);
 		ctx.stroke();
-//---------------------刻度
-		ctx.save();
+
+		ctx.save();	//刻度
 		const scale = 60; let kp = false;
 		for(let i=0;i<scale;i++){
 			ctx.moveTo(0,-MAX);
-			//~ if(i%5==0){
-				//~ ctx.relLineTo(0,15);
-				//~ ctx.relMoveTo(0,20);
-				//~ this.align_show(ctx, (i/5).toString(), size/20);
-			//~ }else{ ctx.relLineTo(0,5); }
 			if(i%5==0){
 				if(i%15==0){
 					ctx.setOperator(Cairo.Operator.SOURCE);
 					this.setcolor(ctx, hand_color, 1);
+					this.align_show(ctx, (i/5).toString());
 					ctx.setLineWidth(size/30);
 				}
 				else {
@@ -110,16 +101,12 @@ class Indicator extends PanelMenu.Button {
 				ctx.relMoveTo(0,-size/35);
 				ctx.relLineTo(0,size/70);
 			}
-			//~ if(i%(scale/4)==0){
-				//~ ctx.relMoveTo(0,20);
-				//~ this.align_show(ctx, (i/5).toString(), size/20);
-				//~ }
 			ctx.stroke();
 			ctx.rotate((360/scale)*(Math.PI/180));	//6度一个刻度
 		}
 		ctx.restore();
-//---------------------时间
-ctx.setOperator(Cairo.Operator.SOURCE);
+
+		ctx.setOperator(Cairo.Operator.SOURCE);	//时间
 		const d0 = new Date();
 		const h = d0.getHours();
 		const m = d0.getMinutes();
