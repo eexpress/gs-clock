@@ -15,13 +15,13 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
 const size = 400;
-let degree = 0;
-	let DA;
-	let ITEM;
+	//~ let DA;
+	//~ let ITEM;
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
 	_init() {
+let degree = 0;
 		super._init(0.0, _('Cairo Clock'));
 
 		this.add_child(new St.Icon({
@@ -31,18 +31,18 @@ class Indicator extends PanelMenu.Button {
 
 		//~ let item = new PopupMenu.PopupBaseMenuItem({reactive: false});
 		let item = new PopupMenu.PopupBaseMenuItem();
-		const da = new St.DrawingArea({
+		this.da = new St.DrawingArea({
 			width: size, height: size
 		});
-		da.connect("repaint", this.on_draw.bind(this));
+		this.da.connect("repaint", this.on_draw.bind(this));
 		//~ item.connect("button-press-event",this.click.bind(this));
 		//~ item.connect("motion-event",this.hover.bind(this));
-		da.connect("motion-event",this.hover.bind(this));
+		this.da.connect("motion-event",this.hover.bind(this));
 		//~ item.connect("show",this.open.bind(this));
 		//~ St.DrawingArea's signals are inherited from Clutter.Actor
-		item.actor.add_child(da);
-		DA = da;
-		ITEM = item;
+		item.actor.add_child(this.da);
+		//~ DA = da;
+		//~ ITEM = item;
 
 		//~ this.clickId = global.stage.connect('button-release-event', this.click.bind(this));
 		this.hoverId = global.stage.connect("motion-event",this.hover.bind(this));
@@ -60,17 +60,17 @@ class Indicator extends PanelMenu.Button {
 	};
 
 	open(actor, event){
-		lg("open: transformed"+DA.get_transformed_position());
+		lg("open: transformed"+this.da.get_transformed_position());
 	};
 
 	hover(actor, event){
 		if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
 		const [x, y] = global.get_pointer();
-		const [x0, y0] = DA.get_transformed_position();
+		const [x0, y0] = this.da.get_transformed_position();
 		const X = x - x0 - size/2; const Y = y - y0 - size/2;
-		degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
-		if(degree<0) degree+=360;
-		lg(X+"x"+Y+" d:"+degree);
+		this.degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
+		if(this.degree<0) this.degree+=360;
+		lg(X+"x"+Y+" d:"+this.degree);
 		//~ DA.queue_redraw();
 		//~ if(0<X<size && 0<Y<size){
 			//~ lg(X+"x"+Y);
@@ -96,8 +96,8 @@ class Indicator extends PanelMenu.Button {
 		//~ lg("click: "+global.get_pointer());
 		//~ lg("click: "+ITEM.get_position());
 		//~ lg("click: "+global.stage.actor.da.get_position());	//rel to PopupBaseMenuItem
-		lg("click: "+ITEM.get_position());	//rel to PopupBaseMenuItem
-		lg("click: "+DA.get_position());	//rel to PopupBaseMenuItem
+		//~ lg("click: "+ITEM.get_position());	//rel to PopupBaseMenuItem
+		lg("click: "+this.da.get_position());	//rel to PopupBaseMenuItem
 		return Clutter.EVENT_STOP;
 	}
 
@@ -176,12 +176,16 @@ class Indicator extends PanelMenu.Button {
 		this.setcolor(ctx, 'red', 1);	//hover 指示
 		ctx.rotate(-Math.PI/2);
 		ctx.setLineWidth (20);
-		//~ ctx.arc(0,0,size/4,0,180*(Math.PI/180));
-		if(degree<0){
-			lg("Error: "+degree);
+		if(this.degree<0){
+			lg("Error: "+this.degree);
 		} else {
-
-		ctx.arc(0,0,size/4,0,degree*Math.PI/180);
+			this.degree = Math.floor(this.degree);
+			lg("OK: "+this.degree+"  typeof ->:"+ typeof this.degree);
+		//~ ctx.arc(0,0,size/4,0,45*(Math.PI/180));
+		ctx.arc(0,0,size/4,0,97*(Math.PI/180));
+		//~ ctx.arc(0,0,size/4,0,185*(Math.PI/180));
+		//~ ctx.arc(0,0,size/4,0,329*(Math.PI/180));
+		//~ ctx.arc(0,0,size/4,0,this.degree*Math.PI/180);
 		//~ ctx.fill();
 		ctx.stroke();
 		ctx.rotate(Math.PI/2);
