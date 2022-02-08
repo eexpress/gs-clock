@@ -29,6 +29,7 @@ class Indicator extends PanelMenu.Button {
 		}));
 
 		//~ let item = new PopupMenu.PopupBaseMenuItem({reactive: false});
+//~ Can disable the close action of PopupMenu when click it, not use `reactive: false` attribute.
 		let item = new PopupMenu.PopupBaseMenuItem();
 		this.da = new St.DrawingArea({
 			width: size, height: size
@@ -38,10 +39,11 @@ class Indicator extends PanelMenu.Button {
 
 		item.connect("button-press-event",this.click.bind(this));
 		item.connect("motion-event",this.hover.bind(this));
+//~ In vala, `motion_notify_event` event.x and event.y is relative coordinate. But GJS here, event.get_coords() show absolute one.
 		//~ item.connect("show",this.open.bind(this));
 		//~ this.da.connect("button-press-event",this.click.bind(this));
 		//~ this.da.connect("motion-event",this.hover.bind(this));
-		//~ St.DrawingArea's signals are inherited from Clutter.Actor
+//~ Since St.DrawingArea's signals are inherited from Clutter.Actor, Why DrawingArea conect "motion-event", no response when hover over?
 
 		//~ this.clickId = global.stage.connect('button-release-event', this.click.bind(this));
 		//~ this.hoverId = global.stage.connect("motion-event",this.hover.bind(this));
@@ -78,6 +80,7 @@ class Indicator extends PanelMenu.Button {
 		//~ if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
 		if(!this.get_coords()) return Clutter.EVENT_PROPAGATE;
 		this.da.queue_redraw();
+//~ Actor(St.DrawingArea).queue_redraw() seems no work? Can force redraw?
 		return Clutter.EVENT_STOP;
 	}
 
