@@ -21,8 +21,8 @@ const size = 400;
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
 	_init() {
-let degree = 0;
 		super._init(0.0, _('Cairo Clock'));
+		this.degree = 0;
 
 		this.add_child(new St.Icon({
 			icon_name: 'gnome-panel-clock',
@@ -70,8 +70,8 @@ let degree = 0;
 		const X = x - x0 - size/2; const Y = y - y0 - size/2;
 		this.degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
 		if(this.degree<0) this.degree+=360;
-		lg(X+"x"+Y+" d:"+this.degree);
-		//~ DA.queue_redraw();
+		lg(X+"x"+Y+" degree:"+this.degree);
+		this.da.queue_redraw();
 		//~ if(0<X<size && 0<Y<size){
 			//~ lg(X+"x"+Y);
 		//~ }
@@ -176,18 +176,21 @@ let degree = 0;
 		this.setcolor(ctx, 'red', 1);	//hover 指示
 		ctx.rotate(-Math.PI/2);
 		ctx.setLineWidth (20);
-		if(this.degree<0){
+		const angleMax = this.degree*Math.PI/180; lg("angleMax = "+angleMax);
+			lg("++++: "+this.degree);
+		if(this.degree<0 ||this.degree>=360){
 			lg("Error: "+this.degree);
 		} else {
 			this.degree = Math.floor(this.degree);
 			lg("OK: "+this.degree+"  typeof ->:"+ typeof this.degree);
-		//~ ctx.arc(0,0,size/4,0,45*(Math.PI/180));
-		ctx.arc(0,0,size/4,0,97*(Math.PI/180));
+// THIS LINE ERROR
+		//~ ctx.arc(0,0,size/4,0,this.degree*Math.PI/180);
+		ctx.arc(0,0,size/4,0,45*(Math.PI/180));
+		//~ ctx.arc(0,0,size/4,0,97*(Math.PI/180));
 		//~ ctx.arc(0,0,size/4,0,185*(Math.PI/180));
 		//~ ctx.arc(0,0,size/4,0,329*(Math.PI/180));
-		//~ ctx.arc(0,0,size/4,0,this.degree*Math.PI/180);
-		//~ ctx.fill();
-		ctx.stroke();
+		ctx.fill();
+		//~ ctx.stroke();
 		ctx.rotate(Math.PI/2);
 		}
 
@@ -196,9 +199,9 @@ let degree = 0;
 		const d0 = new Date();
 		const h = d0.getHours();
 		const m = d0.getMinutes();
-		this.draw_line(ctx, "white", size/25, 0, -parseInt(size/4));	//闹铃，30度1小时
-		this.draw_line(ctx, hand_color, size/20, (h*30+m*30/60)*(Math.PI/180),-parseInt(size/3.7));	//时针，30度1小时
-		this.draw_line(ctx, hand_color, size/33, m*6*(Math.PI/180),-parseInt(size/2.7));	//分针，6度1分钟
+		this.draw_line(ctx, "white", size/25, 0, -Math.floor(size/4));	//闹铃，30度1小时
+		this.draw_line(ctx, hand_color, size/20, (h*30+m*30/60)*(Math.PI/180),-Math.floor(size/3.7));	//时针，30度1小时
+		this.draw_line(ctx, hand_color, size/33, m*6*(Math.PI/180),-Math.floor(size/2.7));	//分针，6度1分钟
 		this.setcolor(ctx, hand_color, 1);
 		ctx.arc(0,0,size/20,0,2*Math.PI);
 		ctx.fill();
