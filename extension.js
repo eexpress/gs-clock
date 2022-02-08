@@ -15,7 +15,9 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
 const size = 400;
+let degree = 0;
 	let DA;
+	let ITEM;
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
@@ -27,21 +29,25 @@ class Indicator extends PanelMenu.Button {
 			style_class: 'system-status-icon',
 		}));
 
-		let item = new PopupMenu.PopupBaseMenuItem({reactive: false});
-		//~ let item = new PopupMenu.PopupBaseMenuItem();
+		//~ let item = new PopupMenu.PopupBaseMenuItem({reactive: false});
+		let item = new PopupMenu.PopupBaseMenuItem();
 		const da = new St.DrawingArea({
 			width: size, height: size
 		});
 		da.connect("repaint", this.on_draw.bind(this));
 		//~ item.connect("button-press-event",this.click.bind(this));
 		//~ item.connect("motion-event",this.hover.bind(this));
-		//~ da.connect("motion-event",this.hover.bind(this));
+		da.connect("motion-event",this.hover.bind(this));
+		//~ item.connect("show",this.open.bind(this));
 		//~ St.DrawingArea's signals are inherited from Clutter.Actor
 		item.actor.add_child(da);
 		DA = da;
+		ITEM = item;
 
-		this.clickId = global.stage.connect('button-release-event', this.click.bind(this));
+		//~ this.clickId = global.stage.connect('button-release-event', this.click.bind(this));
 		this.hoverId = global.stage.connect("motion-event",this.hover.bind(this));
+		//~ global.stage.add_actor(da);
+		//~ global.stage.add_actor(item);	//脱离面板的顶层透明显示。
 
 		this.menu.addMenuItem(item);
 	}
@@ -53,20 +59,44 @@ class Indicator extends PanelMenu.Button {
 		return a;
 	};
 
+	open(actor, event){
+		lg("open: transformed"+DA.get_transformed_position());
+	};
+
 	hover(actor, event){
 		if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
+		const [x, y] = global.get_pointer();
+		const [x0, y0] = DA.get_transformed_position();
+		const X = x - x0 - size/2; const Y = y - y0 - size/2;
+		degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
+		if(degree<0) degree+=360;
+		lg(X+"x"+Y+" d:"+degree);
+		//~ DA.queue_redraw();
+		//~ if(0<X<size && 0<Y<size){
+			//~ lg(X+"x"+Y);
+		//~ }
+
+		//~ lg("hover: "+global.get_pointer());
+		//~ lg("hover: ---> "+event.get_coords());
 		//~ if(this.pickactor() != this) return Clutter.EVENT_PROPAGATE;
-		lg("hover: "+event.get_coords());
-		lg("hover: "+global.get_pointer());
+		//~ lg("hover: "+event.get_coords());
+		//~ lg("hover: "+ITEM.get_position());
+		//~ lg("hover: "+DA.get_position());	//rel to PopupBaseMenuItem
+		//~ lg("hover: transformed "+DA.get_transformed_position());
+		//~ lg("hover: "+global.stage.actor.da.get_position());
 		return Clutter.EVENT_STOP;
 	}
 
 	click(actor, event){
 		if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
+		//~ get_position()
 		//~ if(this.pickactor() != this) return Clutter.EVENT_PROPAGATE;
 		//~ lg(this);	//[0x5638d3b86bc0 Gjs_cairo_eexpss_gmail_com_extension_Indicator.panel-button:first-child last-child active focus]
-		lg("click: "+event.get_coords());
-		lg("click: "+global.get_pointer());
+		//~ lg("click: "+event.get_coords());
+		//~ lg("click: "+global.get_pointer());
+		//~ lg("click: "+ITEM.get_position());
+		//~ lg("click: "+global.stage.actor.da.get_position());	//rel to PopupBaseMenuItem
+		lg("click: "+ITEM.get_position());	//rel to PopupBaseMenuItem
 		lg("click: "+DA.get_position());	//rel to PopupBaseMenuItem
 		return Clutter.EVENT_STOP;
 	}
@@ -141,6 +171,22 @@ class Indicator extends PanelMenu.Button {
 			ctx.rotate((360/scale)*(Math.PI/180));	//6度一个刻度
 		}
 		ctx.restore();
+
+		ctx.setOperator(Cairo.Operator.SOURCE);
+		this.setcolor(ctx, 'red', 1);	//hover 指示
+		ctx.rotate(-Math.PI/2);
+		ctx.setLineWidth (20);
+		//~ ctx.arc(0,0,size/4,0,180*(Math.PI/180));
+		if(degree<0){
+			lg("Error: "+degree);
+		} else {
+
+		ctx.arc(0,0,size/4,0,degree*Math.PI/180);
+		//~ ctx.fill();
+		ctx.stroke();
+		ctx.rotate(Math.PI/2);
+		}
+
 
 		ctx.setOperator(Cairo.Operator.SOURCE);	//时间
 		const d0 = new Date();
