@@ -15,14 +15,13 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
 const size = 400;
-	//~ let DA;
-	//~ let ITEM;
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
 	_init() {
 		super._init(0.0, _('Cairo Clock'));
-		this.degree = 0;
+		this.degree;
+		this.alarm_degree = 0;
 
 		this.add_child(new St.Icon({
 			icon_name: 'gnome-panel-clock',
@@ -35,18 +34,18 @@ class Indicator extends PanelMenu.Button {
 			width: size, height: size
 		});
 		this.da.connect("repaint", this.on_draw.bind(this));
-		//~ item.connect("button-press-event",this.click.bind(this));
-		//~ item.connect("motion-event",this.hover.bind(this));
-		this.da.connect("motion-event",this.hover.bind(this));
-		//~ item.connect("show",this.open.bind(this));
-		//~ St.DrawingArea's signals are inherited from Clutter.Actor
 		item.actor.add_child(this.da);
-		//~ DA = da;
-		//~ ITEM = item;
+
+		item.connect("button-press-event",this.click.bind(this));
+		item.connect("motion-event",this.hover.bind(this));
+		//~ item.connect("show",this.open.bind(this));
+		//~ this.da.connect("button-press-event",this.click.bind(this));
+		//~ this.da.connect("motion-event",this.hover.bind(this));
+		//~ St.DrawingArea's signals are inherited from Clutter.Actor
 
 		//~ this.clickId = global.stage.connect('button-release-event', this.click.bind(this));
-		this.hoverId = global.stage.connect("motion-event",this.hover.bind(this));
-		//~ global.stage.add_actor(da);
+		//~ this.hoverId = global.stage.connect("motion-event",this.hover.bind(this));
+		//~ global.stage.add_actor(this.da);
 		//~ global.stage.add_actor(item);	//脱离面板的顶层透明显示。
 
 		this.menu.addMenuItem(item);
@@ -57,52 +56,43 @@ class Indicator extends PanelMenu.Button {
 		const a = global.stage.get_actor_at_pos(Clutter.PickMode.ALL, x, y);
 		lg(a);
 		return a;
-	};
+	}
 
 	open(actor, event){
 		lg("open: transformed"+this.da.get_transformed_position());
-	};
+	}
 
-	hover(actor, event){
-		if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
+	get_coords(){
 		const [x, y] = global.get_pointer();
 		const [x0, y0] = this.da.get_transformed_position();
+		if(!x0) {return false;}
 		const X = x - x0 - size/2; const Y = y - y0 - size/2;
 		this.degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
+		if(!this.degree) {return false;}
 		if(this.degree<0) this.degree+=360;
-		lg(X+"x"+Y+" degree:"+this.degree);
-		this.da.queue_redraw();
-		//~ if(0<X<size && 0<Y<size){
-			//~ lg(X+"x"+Y);
-		//~ }
+		//~ lg(X+"x"+Y+" degree:"+this.degree);
+		return true;
+	}
 
-		//~ lg("hover: "+global.get_pointer());
-		//~ lg("hover: ---> "+event.get_coords());
-		//~ if(this.pickactor() != this) return Clutter.EVENT_PROPAGATE;
-		//~ lg("hover: "+event.get_coords());
-		//~ lg("hover: "+ITEM.get_position());
-		//~ lg("hover: "+DA.get_position());	//rel to PopupBaseMenuItem
-		//~ lg("hover: transformed "+DA.get_transformed_position());
-		//~ lg("hover: "+global.stage.actor.da.get_position());
+	hover(actor, event){
+		//~ if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
+		if(!this.get_coords()) return Clutter.EVENT_PROPAGATE;
+		this.da.queue_redraw();
 		return Clutter.EVENT_STOP;
 	}
 
 	click(actor, event){
 		if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
-		//~ get_position()
-		//~ if(this.pickactor() != this) return Clutter.EVENT_PROPAGATE;
-		//~ lg(this);	//[0x5638d3b86bc0 Gjs_cairo_eexpss_gmail_com_extension_Indicator.panel-button:first-child last-child active focus]
-		//~ lg("click: "+event.get_coords());
-		//~ lg("click: "+global.get_pointer());
-		//~ lg("click: "+ITEM.get_position());
-		//~ lg("click: "+global.stage.actor.da.get_position());	//rel to PopupBaseMenuItem
-		//~ lg("click: "+ITEM.get_position());	//rel to PopupBaseMenuItem
-		lg("click: "+this.da.get_position());	//rel to PopupBaseMenuItem
+		if(!this.degree) return Clutter.EVENT_PROPAGATE;
+		this.alarm_degree = this.degree;
+		this.da.queue_redraw();
 		return Clutter.EVENT_STOP;
 	}
 
 	align_show(ctx, showtext){
-		//~ let ex = new Cairo.TextExtents();	// APi没有绑定这个函数。 Cairo.TextExtents is not a constructor
+		// API没有绑定这个函数。 Cairo.TextExtents is not a constructor
+		//~ https://gitlab.gnome.org/GNOME/gjs/-/merge_requests/720
+		//~ let ex = new Cairo.TextExtents();
 		//~ ctx.textExtents (showtext, ex);
 		//~ ctx.relMoveTo(-ex.width/2,ex.height/2);
 		//~ ctx.showText(showtext);
@@ -119,7 +109,7 @@ class Indicator extends PanelMenu.Button {
 	setcolor(ctx, colorstr, alpha){
 		const [,cc] = Clutter.Color.from_string(colorstr);
 		ctx.setSourceRGBA(cc.red, cc.green, cc.blue, alpha);
-	};
+	}
 
 	on_draw(area){
 		const back_color="light gray";
@@ -130,6 +120,7 @@ class Indicator extends PanelMenu.Button {
 
 		let ctx = area.get_context();
 		//~ ctx.selectFontFace("Sans Bold 27", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
+		//~ Seems all font class in cairo are disable.
 
 		ctx.translate(size/2, size/2);	//窗口中心为坐标原点。
 		ctx.setLineCap (Cairo.LineCap.ROUND);
@@ -159,7 +150,6 @@ class Indicator extends PanelMenu.Button {
 					ctx.setLineWidth(size/30);
 				}
 				else {
-					//~ https://www.cairographics.org/operators/
 					ctx.setOperator(Cairo.Operator.ATOP);
 					this.setcolor(ctx, back_color, 1);
 					ctx.setLineWidth(size/50);
@@ -172,34 +162,22 @@ class Indicator extends PanelMenu.Button {
 		}
 		ctx.restore();
 
-		ctx.setOperator(Cairo.Operator.SOURCE);
-		this.setcolor(ctx, 'red', 1);	//hover 指示
-		ctx.rotate(-Math.PI/2);
-		ctx.setLineWidth (20);
-		const angleMax = this.degree*Math.PI/180; lg("angleMax = "+angleMax);
-			lg("++++: "+this.degree);
-		if(this.degree<0 ||this.degree>=360){
-			lg("Error: "+this.degree);
-		} else {
-			this.degree = Math.floor(this.degree);
-			lg("OK: "+this.degree+"  typeof ->:"+ typeof this.degree);
-// THIS LINE ERROR
-		//~ ctx.arc(0,0,size/4,0,this.degree*Math.PI/180);
-		ctx.arc(0,0,size/4,0,45*(Math.PI/180));
-		//~ ctx.arc(0,0,size/4,0,97*(Math.PI/180));
-		//~ ctx.arc(0,0,size/4,0,185*(Math.PI/180));
-		//~ ctx.arc(0,0,size/4,0,329*(Math.PI/180));
-		ctx.fill();
-		//~ ctx.stroke();
-		ctx.rotate(Math.PI/2);
+		const angle = this.degree*Math.PI/180;
+		if(angle){
+			//~ ctx.setOperator (Cairo.Operator.SOURCE);
+			this.setcolor(ctx, 'red', 1);	//hover 指示
+			ctx.rotate(-Math.PI/2);
+			ctx.setLineWidth (20);
+			ctx.moveTo(0,0);
+			ctx.arc(0,0,size/4,0,angle);
+			ctx.fill();
+			ctx.rotate(Math.PI/2);
 		}
 
-
-		ctx.setOperator(Cairo.Operator.SOURCE);	//时间
-		const d0 = new Date();
+		const d0 = new Date();	//时间
 		const h = d0.getHours();
 		const m = d0.getMinutes();
-		this.draw_line(ctx, "white", size/25, 0, -Math.floor(size/4));	//闹铃，30度1小时
+		this.draw_line(ctx, "white", size/25, this.alarm_degree*Math.PI/180, -Math.floor(size/4));	//闹铃，30度1小时
 		this.draw_line(ctx, hand_color, size/20, (h*30+m*30/60)*(Math.PI/180),-Math.floor(size/3.7));	//时针，30度1小时
 		this.draw_line(ctx, hand_color, size/33, m*6*(Math.PI/180),-Math.floor(size/2.7));	//分针，6度1分钟
 		this.setcolor(ctx, hand_color, 1);
@@ -209,7 +187,7 @@ class Indicator extends PanelMenu.Button {
 		ctx.arc(0,0,size/33,0,2*Math.PI);
 		ctx.fill();
 		ctx.$dispose();	// 释放context，有用？
-	};
+	}
 
 	draw_line(ctx, color, width, angle, len){
 		ctx.save();
