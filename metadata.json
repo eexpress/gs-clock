@@ -2,6 +2,8 @@
   "name": "Cairo Clock",
   "description": "Cairo Clock",
   "uuid": "cairo@eexpss.gmail.com",
+  "gettext-domain": "cairo",
+  "url": "https://github.com/eexpress/gnome-shell-cairo",
   "shell-version": [
     "40","41","42"
   ]
