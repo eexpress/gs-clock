@@ -30,22 +30,17 @@ class Indicator extends PanelMenu.Button {
 			style_class: 'system-status-icon',
 		}));
 
-		this.cc = new Clock(300);
+		this.cc = new Clock(400);
 		global.stage.add_child(this.cc);
-		//~ this.cc = new St.Bin({ height: size, width: size });
-		//~ this.cc = new Clutter.Actor({ height: size, width: size });
-		//~ this.cc.set_content(canvas);
-		//~ this.cc.set_x_expand(true);
-		//~ this.cc.set_y_expand(true);
 
 		//~ Main.layoutManager.addChrome(this.cc);
-		//~ global.stage.add_actor(this.cc);	//脱离面板的顶层透明显示。
 		this.cc.set_position(100,100);
 		//~ this.cc.set_clip(0, 0, 400, 400);
-		//~ this.cc.visible  = true;
-		//~ this.cc.opacity = 255;
+		this.cc.visible  = true;
+		//~ this.cc.visible  = false;
+		this.cc.opacity = 200;
 		//~ this.cc.reactive = true;
-		//~ this.cc.queue_redraw();
+		this.cc.queue_redraw();
 
 	}
 

@@ -176,10 +176,4 @@ class Clock extends Clutter.Actor {
 		ctx.$dispose();	// 释放context，有用？
 	}
 
-	//~ on_draw(canvas, ctx, width, height){
-		//~ ctx.setSourceRGB(0,255,0);
-		//~ ctx.arc(28, 28, 76.8, 0, 45*Math.PI/180);
-		//~ ctx.fill();
-	//~ };
-
 });
