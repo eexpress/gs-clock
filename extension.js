@@ -7,9 +7,6 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 
-const Clock = Me.imports.Clock;
-const clock = Clock.Clock;
-
 const Gettext = imports.gettext.domain(Me.metadata['gettext-domain']);
 const _ = Gettext.gettext;
 
@@ -29,14 +26,33 @@ class Indicator extends PanelMenu.Button {
 			style_class: 'system-status-icon',
 		}));
 
-		//~ this.menu.actor.connect('button-press-event', (self) => {
-			//~ lg("open");
-			//~ const c = new Clock();
-		//~ });
+//~ new Clutter.cc -> set_content -> new Clutter.Canvas -> ctx
+		const canvas = new Clutter.Canvas({ height: 400, width: 400 });
+		canvas.connect('draw', (c, ctx, width, height) => {
+			ctx.setSourceRGB(0,255,0);
+			ctx.arc(128, 128, 76.8, 0, 45*Math.PI/180);
+			ctx.fill();
+		})
 
-		const d = new clock();
-		Main.layoutManager.addChrome(d);
-		d.set_clip(0, 0, this.width, this.height);
+		canvas.invalidate();
+
+		this.cc = new Clutter.Actor();
+		this.cc.set_content(canvas);
+		this.cc.set_x_expand(true);
+		this.cc.set_y_expand(true);
+
+		Main.layoutManager.addChrome(this.cc);
+		//~ global.stage.add_actor(this.cc);	//脱离面板的顶层透明显示。
+		this.cc.set_position(200,200);
+		this.cc.set_clip(0, 0, 400, 400);
+		this.cc.visible  = true;
+		this.cc.opacity = 255;
+		this.cc.reactive = true;
+
+	}
+
+	destroy() {
+		Main.layoutManager.removeChrome(this.cc);
 	}
 
 });

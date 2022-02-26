@@ -4,6 +4,7 @@
   "uuid": "cairo@eexpss.gmail.com",
   "gettext-domain": "cairo",
   "url": "https://github.com/eexpress/gnome-shell-cairo",
+  "gettext-domain": "cairo",
   "shell-version": [
     "40","41","42"
   ]
