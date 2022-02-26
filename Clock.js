@@ -12,7 +12,7 @@ class Clock extends Clutter.Actor {
 		super._init();
 
 		if(x) size =x;
-		this.degree;
+		this.degree =0;
 		this.alarm_degree = 0;
 
 		this._canvas = new Clutter.Canvas();
@@ -27,10 +27,13 @@ class Clock extends Clutter.Actor {
 	}
 
 	get_coords(){
+		const MIN = size/10;
 		const [x, y] = global.get_pointer();
 		const [x0, y0] = this.get_transformed_position();
 		if(!x0) {return false;}
 		const X = x - x0 - size/2; const Y = y - y0 - size/2;
+		const distant = Math.sqrt(X*X+Y*Y);
+		if(distant > MIN)
 		this.degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
 		if(!this.degree) {return false;}
 		if(this.degree<0) this.degree+=360;
@@ -92,7 +95,6 @@ class Clock extends Clutter.Actor {
 	on_draw(canvas, ctx, width, height){
 		const back_color="light gray";
 		const hand_color='black';
-		const MIN = size/10;
 		const MAX = size/2-size/12;
 
 		//~ ctx.selectFontFace("Sans Bold 27", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
@@ -148,6 +150,14 @@ class Clock extends Clutter.Actor {
 			ctx.arc(0,0,size/4,0,angle);
 			ctx.fill();
 			ctx.rotate(Math.PI/2);
+
+			ctx.moveTo(0,size/4);
+			const at = this.degree * 2;
+			const ah = parseInt(at / 60);
+			const am = parseInt((at - ah * 60) / 5) * 5;
+			this.align_show(ctx, ah+" : "+am);
+			//~ this.align_show(ctx, (this.degree).toString());
+			ctx.moveTo(0,0);
 		}
 
 		const d0 = new Date();	//时间
