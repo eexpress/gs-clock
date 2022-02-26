@@ -1,25 +1,61 @@
 const Cairo = imports.cairo;
 const { Clutter, GObject, GLib, PangoCairo, Pango } = imports.gi;
 
+let size = 400;
+
 var Clock = GObject.registerClass({
 	Properties : {},
 	Signals : {}
 },
 class Clock extends Clutter.Actor {
-	_init(size) {
+	_init(x) {
 		super._init();
 
-		this.s = size;
+		if(x) size =x;
 		this.degree;
 		this.alarm_degree = 0;
 
 		this._canvas = new Clutter.Canvas();
 		this._canvas.connect('draw', this.on_draw.bind(this));
-
 		this._canvas.invalidate();
 		this._canvas.set_size(size, size);
 		this.set_size(size, size);
 		this.set_content(this._canvas);
+		this.reactive = true;
+		this.connect("motion-event",this.hover.bind(this));
+		this.connect("button-press-event",this.click.bind(this));
+	}
+
+	get_coords(){
+		const [x, y] = global.get_pointer();
+		const [x0, y0] = this.get_transformed_position();
+		if(!x0) {return false;}
+		const X = x - x0 - size/2; const Y = y - y0 - size/2;
+		this.degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
+		if(!this.degree) {return false;}
+		if(this.degree<0) this.degree+=360;
+		//~ log(X+"x"+Y+" degree:"+this.degree);
+		return true;
+	}
+
+	hover(actor, event){
+		//~ if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
+		if(!this.get_coords()) return Clutter.EVENT_PROPAGATE;
+		this.queue_redraw();
+		//~ this._canvas.
+//~ Actor(St.DrawingArea).queue_redraw() seems no work? Can force redraw?
+		return Clutter.EVENT_STOP;
+	}
+
+	click(actor, event){
+		//~ log("click");
+		//~ if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
+		if(!this.degree) return Clutter.EVENT_PROPAGATE;
+		//~ log(this.degree);
+		this.alarm_degree = this.degree;
+		this.queue_redraw();
+		//~ this.on_draw(_canvas);
+		return Clutter.EVENT_STOP;
 	}
 
 	draw_line(ctx, color, width, angle, len){
@@ -62,13 +98,14 @@ class Clock extends Clutter.Actor {
 	}
 
 	on_draw(canvas, ctx, width, height){
-		const size = this.s;
+		//~ log("draw");
 		const back_color="light gray";
 		const hand_color='black';
 		const MIN = size/10;
 		const MAX = size/2-size/12;
 
-		//~ let ctx = area.get_context();
+		//~ let ctx = canvas.get_context(); //canvas.get_context is not a function
+
 		//~ ctx.selectFontFace("Sans Bold 27", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
 		//~ Seems all font class in cairo are disable.
 
@@ -144,4 +181,5 @@ class Clock extends Clutter.Actor {
 		//~ ctx.arc(28, 28, 76.8, 0, 45*Math.PI/180);
 		//~ ctx.fill();
 	//~ };
+
 });
