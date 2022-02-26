@@ -34,27 +34,19 @@ class Clock extends Clutter.Actor {
 		this.degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
 		if(!this.degree) {return false;}
 		if(this.degree<0) this.degree+=360;
-		//~ log(X+"x"+Y+" degree:"+this.degree);
 		return true;
 	}
 
 	hover(actor, event){
-		//~ if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
 		if(!this.get_coords()) return Clutter.EVENT_PROPAGATE;
-		this.queue_redraw();
-		//~ this._canvas.
-//~ Actor(St.DrawingArea).queue_redraw() seems no work? Can force redraw?
+		this._canvas.invalidate();
 		return Clutter.EVENT_STOP;
 	}
 
 	click(actor, event){
-		//~ log("click");
-		//~ if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
 		if(!this.degree) return Clutter.EVENT_PROPAGATE;
-		//~ log(this.degree);
 		this.alarm_degree = this.degree;
-		this.queue_redraw();
-		//~ this.on_draw(_canvas);
+		this._canvas.invalidate();
 		return Clutter.EVENT_STOP;
 	}
 
@@ -98,13 +90,10 @@ class Clock extends Clutter.Actor {
 	}
 
 	on_draw(canvas, ctx, width, height){
-		//~ log("draw");
 		const back_color="light gray";
 		const hand_color='black';
 		const MIN = size/10;
 		const MAX = size/2-size/12;
-
-		//~ let ctx = canvas.get_context(); //canvas.get_context is not a function
 
 		//~ ctx.selectFontFace("Sans Bold 27", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
 		//~ Seems all font class in cairo are disable.
