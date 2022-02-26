@@ -12,9 +12,9 @@ class Clock extends Clutter.Actor {
 		super._init(params);
 		const canvas = new Clutter.Canvas({ height: 400, width: 400 });
 		canvas.connect('draw', (c, ctx, width, height) => {
-			cr.setSourceRGB(0,255,0);
-			cr.arc(128, 128, 76.8, 0, 45*Math.PI/180);
-			cr.fill();
+			ctx.setSourceRGB(0,255,0);
+			ctx.arc(128, 128, 76.8, 0, 45*Math.PI/180);
+			ctx.fill();
 		})
 
 		canvas.invalidate();
@@ -24,7 +24,7 @@ class Clock extends Clutter.Actor {
 		actor.set_x_expand(true);
 		actor.set_y_expand(true);
 
-		return actor;
+		//~ return actor;
 	}
 
 });

@@ -8,6 +8,7 @@ const PopupMenu = imports.ui.popupMenu;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 
 const Clock = Me.imports.Clock;
+const clock = Clock.Clock;
 
 const Gettext = imports.gettext.domain(Me.metadata['gettext-domain']);
 const _ = Gettext.gettext;
@@ -28,12 +29,14 @@ class Indicator extends PanelMenu.Button {
 			style_class: 'system-status-icon',
 		}));
 
-		this.menu.actor.connect('button-press-event', (self) => {
-			lg("open");
-			const c = new Clock();
-		});
+		//~ this.menu.actor.connect('button-press-event', (self) => {
+			//~ lg("open");
+			//~ const c = new Clock();
+		//~ });
 
-		const d = new Clock();
+		const d = new clock();
+		Main.layoutManager.addChrome(d);
+		d.set_clip(0, 0, this.width, this.height);
 	}
 
 });
