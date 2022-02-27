@@ -36,10 +36,10 @@ var xClock = GObject.registerClass({
 	get_coords() {
 		const MIN = size / 10;
 		const [x, y] = global.get_pointer();
-		const [x0, y0] = this.get_transformed_position();
-		if (!x0) { return false; }
-		const X = x - x0 - size / 2;
-		const Y = y - y0 - size / 2;
+		const [op, x0, y0] = this.transform_stage_point(x, y);
+		if(!op) return false;
+		const X = x0 - size / 2;
+		const Y = y0 - size / 2;
 		const distant = Math.sqrt(X * X + Y * Y);
 		this.IsCenter = distant > MIN ? false : true;
 		if (!this.IsCenter)

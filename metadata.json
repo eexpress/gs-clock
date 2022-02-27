@@ -1,10 +1,9 @@
 {
   "name": "Cairo Clock",
-  "description": "Cairo Clock",
+  "description": "Cairo Clock. click clock face to set alarm, click center circel to enable alarm.",
   "uuid": "cairo@eexpss.gmail.com",
-  "gettext-domain": "cairo",
+  "gettext-domain": "cairo-clock",
   "url": "https://github.com/eexpress/gnome-shell-cairo",
-  "gettext-domain": "cairo",
   "shell-version": [
     "40","41","42"
   ]
