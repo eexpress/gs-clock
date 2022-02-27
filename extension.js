@@ -19,7 +19,6 @@ function lg(s) {
 const xClock = Me.imports.Clock.xClock;
 const size = 400;
 let xc = null;
-let menu = null;
 
 const Indicator = GObject.registerClass(
 	class Indicator extends PanelMenu.Button {
@@ -32,9 +31,7 @@ const Indicator = GObject.registerClass(
 			}));
 
 			xc = new xClock(400);
-			menu = this.menu;
 			//~ global.stage.add_child(this.cc);
-
 			//~ Main.layoutManager.addChrome(this.cc);
 			//~ this.cc.set_position(100,100);
 			//~ this.cc.set_clip(0, 0, 400, 400);
@@ -51,10 +48,10 @@ const Indicator = GObject.registerClass(
 
 		destroy() {
 			//~ Main.layoutManager.removeChrome(this.cc);
-			//~ this.cc.destroy();
 			//~ global.stage.remove_child(this.cc);
-			//~ delete this.cc;
-			super.destroy();
+			//~ xc.destroy();
+			//~ delete xc;
+			super.destroy(); //Extension point conflict if no destroy.
 		}
 	});
 
@@ -71,14 +68,14 @@ class Extension {
 		timeoutId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 10, () => {
 			const [h, m] = xc.get_alarm();
 			if (h && m) {
-				const d0 = new Date(); //时间
+				const d0 = new Date();
 				let h0 = d0.getHours();
 				h0 %= 12;
 				const m0 = d0.getMinutes();
 				if (h == h0 && m == m0) {
 					const player = global.display.get_sound_player();
 					player.play_from_theme('complete', 'countdown', null);
-					if (menu) menu.open();
+					this._indicator.menu.open();
 				}
 			}
 			return GLib.SOURCE_CONTINUE;
