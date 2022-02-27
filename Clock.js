@@ -3,11 +3,11 @@ const { Clutter, GObject, GLib, PangoCairo, Pango } = imports.gi;
 
 let size = 400;
 
-var Clock = GObject.registerClass({
+var xClock = GObject.registerClass({
 	Properties : {},
 	Signals : {}
 },
-class Clock extends Clutter.Actor {
+class xClock extends Clutter.Actor {
 	_init(x) {
 		super._init();
 

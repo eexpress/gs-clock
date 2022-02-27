@@ -16,7 +16,7 @@ function lg(s) {
 	if (debug) log("===" + Me.metadata['gettext-domain'] + "===>" + s);
 }
 
-const Clock = Me.imports.Clock.Clock;
+const xClock = Me.imports.Clock.xClock;
 
 const size = 400;
 
@@ -30,7 +30,7 @@ class Indicator extends PanelMenu.Button {
 			style_class: 'system-status-icon',
 		}));
 
-		this.cc = new Clock(400);
+		this.cc = new xClock(400);
 		//~ global.stage.add_child(this.cc);
 
 		//~ Main.layoutManager.addChrome(this.cc);
