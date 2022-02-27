@@ -10,8 +10,8 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Gettext = imports.gettext.domain(Me.metadata['gettext-domain']);
 const _ = Gettext.gettext;
 
-//~ const debug = false;
-const debug = true;
+const debug = false;
+//~ const debug = true;
 function lg(s) {
 	if (debug) log("===" + Me.metadata['gettext-domain'] + "===>" + s);
 }
@@ -39,6 +39,10 @@ class Indicator extends PanelMenu.Button {
 		this.da.reactive = true;	//开，才能连信号
 		this.da.connect("button-press-event",this.click.bind(this));
 		this.da.connect("motion-event",this.hover.bind(this));
+		this.da.connect("leave-event", ()=>{
+			this.degree = 0;
+			this.da.queue_repaint();
+		});
 
 		const item = new PopupMenu.PopupBaseMenuItem();
 		item.actor.add_child(this.da);
