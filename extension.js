@@ -31,17 +31,19 @@ class Indicator extends PanelMenu.Button {
 		}));
 
 		this.cc = new Clock(400);
-		global.stage.add_child(this.cc);
+		//~ global.stage.add_child(this.cc);
 
 		//~ Main.layoutManager.addChrome(this.cc);
-		this.cc.set_position(100,100);
+		//~ this.cc.set_position(100,100);
 		//~ this.cc.set_clip(0, 0, 400, 400);
-		this.cc.visible  = true;
+		//~ this.cc.visible  = true;
 		//~ this.cc.visible  = false;
-		this.cc.opacity = 200;
+		//~ this.cc.opacity = 200;
 		//~ this.cc.reactive = true;
-		this.cc.queue_redraw();
-
+		//~ this.cc.queue_redraw();
+		let item = new PopupMenu.PopupBaseMenuItem();
+		item.actor.add_child(this.cc);
+		this.menu.addMenuItem(item);
 	}
 
 	destroy() {
@@ -51,7 +53,6 @@ class Indicator extends PanelMenu.Button {
 		delete this.cc;
 		super.destroy();
 	}
-
 });
 
 class Extension {
