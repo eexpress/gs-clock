@@ -25,7 +25,7 @@ const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
 	_init() {
 		super._init(0.0, _('Cairo Clock'));
-		this.degree;
+		this.hover_degree = 0;
 		this.alarm_degree = 0;
 		this.IsCenter = false;
 		this.alarm_active = false;
@@ -40,7 +40,7 @@ class Indicator extends PanelMenu.Button {
 		this.da.connect("button-press-event",this.click.bind(this));
 		this.da.connect("motion-event",this.hover.bind(this));
 		this.da.connect("leave-event", ()=>{
-			this.degree = 0;
+			this.hover_degree = 0;
 			this.da.queue_repaint();
 		});
 
@@ -60,9 +60,9 @@ class Indicator extends PanelMenu.Button {
 		const distant = Math.sqrt(X * X + Y * Y);
 		this.IsCenter = distant > MIN ? false : true;
 		if (!this.IsCenter)
-		this.degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
-		if(!this.degree) {return false;}
-		if(this.degree<0) this.degree+=360;
+		this.hover_degree=Math.ceil(Math.atan2(Y, X)/(Math.PI/180))+90;
+		if(!this.hover_degree) {return false;}
+		if(this.hover_degree<0) this.hover_degree+=360;
 		return true;
 	}
 
@@ -75,9 +75,9 @@ class Indicator extends PanelMenu.Button {
 
 	click(actor, event){
 		if(!this.menu.isOpen) return Clutter.EVENT_PROPAGATE;
-		if(!this.degree) return Clutter.EVENT_PROPAGATE;
+		if(!this.hover_degree) return Clutter.EVENT_PROPAGATE;
 		if (!this.IsCenter)
-		this.alarm_degree = this.degree;
+		this.alarm_degree = this.hover_degree;
 		else
 			this.alarm_active = !this.alarm_active;
 		if (this.alarm_active) {
@@ -109,7 +109,7 @@ class Indicator extends PanelMenu.Button {
 		ctx.restore(); //消除旋转的角度
 	}
 
-	align_show(ctx, showtext){
+	align_show(ctx, showtext, font = "Sans Bold 20"){
 		// API没有绑定这个函数。 Cairo.TextExtents is not a constructor
 		//~ https://gitlab.gnome.org/GNOME/gjs/-/merge_requests/720
 		//~ let ex = new Cairo.TextExtents();
@@ -118,7 +118,7 @@ class Indicator extends PanelMenu.Button {
 		//~ ctx.showText(showtext);
 		let pl = PangoCairo.create_layout(ctx);
 		pl.set_text(showtext, -1);
-		pl.set_font_description(Pango.FontDescription.from_string("Sans Bold 20"));
+		pl.set_font_description(Pango.FontDescription.from_string(font));
 		PangoCairo.update_layout(ctx, pl);
 		let [w,h] = pl.get_pixel_size();
 		ctx.relMoveTo(-w/2,0);
@@ -181,8 +181,12 @@ class Indicator extends PanelMenu.Button {
 		}
 		ctx.restore();
 
-		const angle = this.degree*Math.PI/180;
-		if (angle && !this.alarm_active) {
+		const d0 = new Date();	//时间
+		const h0 = d0.getHours();
+		const m0 = d0.getMinutes();
+
+		if (this.hover_degree && !this.alarm_active) {
+			const angle = this.hover_degree*Math.PI/180;
 			//~ ctx.setOperator (Cairo.Operator.SOURCE);
 			this.setcolor(ctx, 'red', 1);	//hover 指示
 			ctx.rotate(-Math.PI/2);
@@ -193,19 +197,20 @@ class Indicator extends PanelMenu.Button {
 			ctx.rotate(Math.PI/2);
 
 			ctx.moveTo(0, size / 4);
-			const [ah, am] = this.degree2time(this.degree);
+			const [ah, am] = this.degree2time(this.hover_degree);
 			this.align_show(ctx, '%02s : %02s'.format(ah, am));
+		} else {
+			this.setcolor(ctx, 'black', 1);
+			ctx.moveTo(0, size / 7);
+			this.align_show(ctx, '%02s : %02s'.format(h0, m0), "DejaVuSerif Bold 24");
 		}
 		if (this.alarm_active) {
 			this.setcolor(ctx, 'blue', 1);
-			ctx.moveTo(0, -size / 2.9);
-			this.align_show(ctx, '%02s : %02s'.format(alarm_h, alarm_m));
+			ctx.moveTo(0, -size / 5);
+			this.align_show(ctx, '%02s : %02s'.format(alarm_h, alarm_m), "DejaVuSerif Bold 24");
 		}
 
 		ctx.moveTo(0, 0);
-		const d0 = new Date();	//时间
-		const h0 = d0.getHours();
-		const m0 = d0.getMinutes();
 		this.draw_line(ctx, "white", size/25, this.alarm_degree*Math.PI/180, -Math.floor(size/4));	//闹铃，30度1小时
 		this.draw_line(ctx, hand_color, size / 20, (h0 * 30 + m0 * 30 / 60) * (Math.PI / 180), -Math.floor(size / 3.7)); //时针，30度1小时
 		this.draw_line(ctx, hand_color, size / 33, m0 * 6 * (Math.PI / 180), -Math.floor(size / 2.7)); //分针，6度1分钟
@@ -240,6 +245,9 @@ class Extension {
 
 	enable() {
 		timeoutId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 10, () => {
+			if(this._indicator.menu.isOpen){
+				this._indicator.da.queue_repaint();
+			}
 			const [h, m] = [alarm_h, alarm_m];
 			if (h && m) {
 				const d0 = new Date();
