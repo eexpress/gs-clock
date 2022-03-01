@@ -8,4 +8,9 @@ Cairo Clock for gnome-shell
 
 Import from `cairo-timer`
 
+> Two Mode. Alt+Click on menu icon to toggle mode.
+
+- Alarm-Mode: Click the clock face to set the alarm, click the center circle to enable the alarm.
+- Clock-Mode: Transparent clock suspended on the desktop.
+
 ![](screenshot.png)
