@@ -10,8 +10,8 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Gettext = imports.gettext.domain(Me.metadata['gettext-domain']);
 const _ = Gettext.gettext;
 
-//~ const debug = false;
-const debug = true;
+const debug = false;
+//~ const debug = true;
 function lg(s) {
 	if (debug) log("===" + Me.metadata['gettext-domain'] + "===>" + s);
 }
@@ -31,33 +31,26 @@ const Indicator = GObject.registerClass(
 			}));
 
 			xc = new xClock(400);
-			global.stage.add_child(xc);
-			//~ Main.layoutManager.addChrome(this.cc);
-			xc.set_position(100,100);
-			//~ this.cc.set_clip(0, 0, 400, 400);
-			xc.visible  = true;
-			//~ this.cc.visible  = false;
-			//~ this.cc.opacity = 200;
+			//~ global.stage.add_child(xc);
+			Main.layoutManager.addChrome(xc);
+			xc.set_position(100, 100);
+			xc.visible = false;
 			xc.reactive = true;
-			//~ this.cc.queue_redraw();
 
-			//~ let item = new PopupMenu.PopupBaseMenuItem();
-			//~ item.reactive = false;
-			//~ item.actor.add_child(xc);
-			//~ this.menu.addMenuItem(item);
-			this.connect("button-press-event", (actor, event)=>{
+			this.width = 50;
+			this.background_color = Clutter.Color.from_string("gray")[1];
+			this.connect("button-press-event", (actor, event) => {
 				const [x, y] = global.get_pointer();
 				xc.set_position(x - size / 2, y + 50);
-				xc.visible  = !xc.visible;
+				xc.visible = !xc.visible;
 			});
 		}
 
 		destroy() {
-			//~ Main.layoutManager.removeChrome(this.cc);
-			//~ global.stage.remove_child(this.cc);
-			//~ xc.destroy();
-			//~ delete xc;
-			super.destroy(); //Extension point conflict if no destroy.
+			Main.layoutManager.removeChrome(xc);
+			//~ global.stage.remove_child(xc);
+			xc.destroy();
+			super.destroy(); // Extension point conflict if no destroy.
 		}
 	});
 
@@ -81,7 +74,7 @@ class Extension {
 				if (h == h0 && m == m0) {
 					const player = global.display.get_sound_player();
 					player.play_from_theme('complete', 'countdown', null);
-					this._indicator.menu.open();
+					xc.visible = true;
 				}
 			}
 			return GLib.SOURCE_CONTINUE;
