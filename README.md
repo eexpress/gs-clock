@@ -10,6 +10,8 @@ Import from `cairo-timer`
 
 Click the clock face to set the alarm, click the center circle to enable the alarm.
 
+Alt click on main icon, background of icon become green, this enable Popup per hour function.
+
 ![](screenshot.png)
 
 Special thanks `Simon Schneegans`

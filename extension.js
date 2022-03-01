@@ -19,6 +19,7 @@ function lg(s) {
 const xClock = Me.imports.Clock.xClock;
 const size = 400;
 let xc = null;
+let pop_per_hour = false;	//整点弹出报时。
 
 const Indicator = GObject.registerClass(
 	class Indicator extends PanelMenu.Button {
@@ -39,9 +40,16 @@ const Indicator = GObject.registerClass(
 			this.width = 50;
 			this.background_color = Clutter.Color.from_string("gray")[1];
 			this.connect("button-press-event", (actor, event) => {
+				const altkey = event.get_state() & Clutter.ModifierType.MOD1_MASK;
+				if(altkey){
+					pop_per_hour = !pop_per_hour;
+					this.background_color = Clutter.Color.from_string(pop_per_hour ? "green" : "gray")[1];
+					return Clutter.EVENT_STOP;
+				}
 				const [x, y] = global.get_pointer();
 				xc.set_position(x - size / 2 + 10, y + 30);
 				xc.visible = !xc.visible;
+				return Clutter.EVENT_STOP;
 			});
 		}
 
@@ -65,16 +73,19 @@ class Extension {
 	enable() {
 		timeoutId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 10, () => {
 			const [h, m] = xc.get_alarm();
+			const d0 = new Date();
+			const m0 = d0.getMinutes();
 			if (h && m) {
-				const d0 = new Date();
 				let h0 = d0.getHours();
 				h0 %= 12;
-				const m0 = d0.getMinutes();
 				if (h == h0 && m == m0) {
 					const player = global.display.get_sound_player();
 					player.play_from_theme('complete', 'countdown', null);
 					xc.visible = true;
 				}
+			}
+			if(pop_per_hour){	//整点弹出报时
+				if(m0 == 0 && d0.get_second() < 12) xc.visible = true;
 			}
 			return GLib.SOURCE_CONTINUE;
 		});
