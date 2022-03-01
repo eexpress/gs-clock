@@ -33,7 +33,6 @@ const Indicator = GObject.registerClass(
 			xc = new xClock(400);
 			//~ global.stage.add_child(xc);
 			Main.layoutManager.addChrome(xc);
-			xc.set_position(100, 100);
 			xc.visible = false;
 			xc.reactive = true;
 
@@ -41,7 +40,7 @@ const Indicator = GObject.registerClass(
 			this.background_color = Clutter.Color.from_string("gray")[1];
 			this.connect("button-press-event", (actor, event) => {
 				const [x, y] = global.get_pointer();
-				xc.set_position(x - size / 2, y + 50);
+				xc.set_position(x - size / 2 + 10, y + 30);
 				xc.visible = !xc.visible;
 			});
 		}
