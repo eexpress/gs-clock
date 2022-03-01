@@ -85,7 +85,9 @@ class Extension {
 				}
 			}
 			if(pop_per_hour){	//整点弹出报时
-				if(m0 == 0 && d0.get_second() < 12) xc.visible = true;
+				const s0 = d0.getSeconds();
+				if(m0 == 0 && s0 < 10) xc.visible = true;
+				//~ if(m0 %5 == 0 &&  s0 < 10) xc.visible = true;	//5分钟测试用
 			}
 			return GLib.SOURCE_CONTINUE;
 		});
