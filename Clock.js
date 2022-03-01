@@ -4,6 +4,8 @@ const { Clutter, GObject, GLib, PangoCairo, Pango } = imports.gi;
 let size = 400;
 let alarm_h = null;
 let alarm_m = null;
+const MAX = size / 2 - size / 12;
+const MIN = size / 10;
 
 var xClock = GObject.registerClass({
 	Properties : {},
@@ -34,13 +36,17 @@ var xClock = GObject.registerClass({
 	};
 
 	get_coords() {
-		const MIN = size / 10;
 		const [x, y] = global.get_pointer();
 		const [op, x0, y0] = this.transform_stage_point(x, y);
 		if (!op) return false;
 		const X = x0 - size / 2;
 		const Y = y0 - size / 2;
 		const distant = Math.sqrt(X * X + Y * Y);
+		if(distant > MAX){
+			this.hover_degree = 0;
+			this._canvas.invalidate();
+			return false;
+		}
 		this.IsCenter = distant > MIN ? false : true;
 		if (!this.IsCenter)
 			this.hover_degree = Math.ceil(Math.atan2(Y, X) / (Math.PI / 180)) + 90;
@@ -115,7 +121,6 @@ var xClock = GObject.registerClass({
 	on_draw(canvas, ctx, width, height) {
 		const back_color = "light gray";
 		const hand_color = 'black';
-		const MAX = size / 2 - size / 12;
 
 		ctx.setOperator(Cairo.Operator.CLEAR);
 		ctx.paint();
