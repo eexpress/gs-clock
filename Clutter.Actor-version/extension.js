@@ -31,19 +31,25 @@ const Indicator = GObject.registerClass(
 			}));
 
 			xc = new xClock(400);
-			//~ global.stage.add_child(this.cc);
+			global.stage.add_child(xc);
 			//~ Main.layoutManager.addChrome(this.cc);
-			//~ this.cc.set_position(100,100);
+			xc.set_position(100,100);
 			//~ this.cc.set_clip(0, 0, 400, 400);
-			//~ this.cc.visible  = true;
+			xc.visible  = true;
 			//~ this.cc.visible  = false;
 			//~ this.cc.opacity = 200;
-			//~ this.cc.reactive = true;
+			xc.reactive = true;
 			//~ this.cc.queue_redraw();
-			let item = new PopupMenu.PopupBaseMenuItem();
-			item.reactive = false;
-			item.actor.add_child(xc);
-			this.menu.addMenuItem(item);
+
+			//~ let item = new PopupMenu.PopupBaseMenuItem();
+			//~ item.reactive = false;
+			//~ item.actor.add_child(xc);
+			//~ this.menu.addMenuItem(item);
+			this.connect("button-press-event", (actor, event)=>{
+				const [x, y] = global.get_pointer();
+				xc.set_position(x - size / 2, y + 50);
+				xc.visible  = !xc.visible;
+			});
 		}
 
 		destroy() {
