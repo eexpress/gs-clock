@@ -1,6 +1,6 @@
 {
   "name": "Cairo Clock",
-  "description": "Cairo Clock. \n Click the clock face to set the alarm, click the center circle to enable the alarm.\n Alt click on main icon, background of icon become green, this enable Popup per hour function. \n In case of alarm, the clock will swing dynamically.",
+  "description": "Cairo Clock. \n Click the clock face to set the alarm, click the center circle to enable the alarm.\n Alt click on main icon, background of icon become green, this enable Popup per hour function. \n Ctrl + click on main icon, can test the alarm effect.\n In case of alarm, the clock will swing dynamically.",
   "uuid": "cairo@eexpss.gmail.com",
   "gettext-domain": "cairo-clock",
   "url": "https://github.com/eexpress/gnome-shell-cairo",

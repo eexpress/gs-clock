@@ -12,9 +12,13 @@ Click the clock face to set the alarm, click the center circle to enable the ala
 
 单击钟面设置闹钟，单击中心圆启用闹钟。
 
-Alt click on main icon, background of icon become green, this enable Popup per hour function.
+Alt + click on main icon, background of icon become green, this enable Popup per hour function.
 
 Alt+点击主图标，图标背景变为绿色，启用每小时弹出报时功能。
+
+Ctrl + click on main icon, can test the alarm effect.
+
+Ctrl+点击主图标，能测试闹钟的动态效果。
 
 In case of alarm, the clock will swing dynamically.
 
