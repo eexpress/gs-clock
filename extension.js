@@ -19,7 +19,7 @@ function lg(s) {
 const xClock = Me.imports.Clock.xClock;
 const size = 400;
 let xc = null;
-let pop_per_hour = false;	//整点弹出报时。
+let pop_per_hour = false; //整点弹出报时。
 
 const Indicator = GObject.registerClass(
 	class Indicator extends PanelMenu.Button {
@@ -41,9 +41,14 @@ const Indicator = GObject.registerClass(
 			this.background_color = Clutter.Color.from_string("gray")[1];
 			this.connect("button-press-event", (actor, event) => {
 				const altkey = event.get_state() & Clutter.ModifierType.MOD1_MASK;
-				if(altkey){
+				const ctrlkey = event.get_state() & Clutter.ModifierType.CONTROL_MASK;
+				if (altkey) {
 					pop_per_hour = !pop_per_hour;
 					this.background_color = Clutter.Color.from_string(pop_per_hour ? "green" : "gray")[1];
+					return Clutter.EVENT_STOP;
+				}
+				if (ctrlkey) {
+					this.alarm();
 					return Clutter.EVENT_STOP;
 				}
 				const [x, y] = global.get_pointer();
@@ -53,7 +58,7 @@ const Indicator = GObject.registerClass(
 			});
 		}
 
-		alarm(){
+		alarm() {
 			const player = global.display.get_sound_player();
 			player.play_from_theme('complete', 'countdown', null);
 			xc.visible = true;
@@ -87,10 +92,9 @@ class Extension {
 				h0 %= 12;
 				if (h == h0 && m == m0) this._indicator.alarm();
 			}
-			if(pop_per_hour){	//整点弹出报时
+			if (pop_per_hour) { //整点弹出报时
 				const s0 = d0.getSeconds();
-				if(m0 == 0 && s0 < 10)
-				//~ if(m0 %2 == 0 &&  s0 < 10)//2分钟测试用
+				if (m0 == 0 && s0 < 10)
 				//~ if(s0 < 10)//1分钟测试用
 					this._indicator.alarm();
 			}
