@@ -53,6 +53,13 @@ const Indicator = GObject.registerClass(
 			});
 		}
 
+		alarm(){
+			const player = global.display.get_sound_player();
+			player.play_from_theme('complete', 'countdown', null);
+			xc.visible = true;
+			xc.swing();
+		}
+
 		destroy() {
 			Main.layoutManager.removeChrome(xc);
 			//~ global.stage.remove_child(xc);
@@ -78,16 +85,14 @@ class Extension {
 			if (h && m) {
 				let h0 = d0.getHours();
 				h0 %= 12;
-				if (h == h0 && m == m0) {
-					const player = global.display.get_sound_player();
-					player.play_from_theme('complete', 'countdown', null);
-					xc.visible = true;
-				}
+				if (h == h0 && m == m0) this._indicator.alarm();
 			}
 			if(pop_per_hour){	//整点弹出报时
 				const s0 = d0.getSeconds();
-				if(m0 == 0 && s0 < 10) xc.visible = true;
-				//~ if(m0 %5 == 0 &&  s0 < 10) xc.visible = true;	//5分钟测试用
+				if(m0 == 0 && s0 < 10)
+				//~ if(m0 %2 == 0 &&  s0 < 10)//2分钟测试用
+				//~ if(s0 < 10)//1分钟测试用
+					this._indicator.alarm();
 			}
 			return GLib.SOURCE_CONTINUE;
 		});

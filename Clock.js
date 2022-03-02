@@ -7,6 +7,9 @@ let alarm_m = null;
 const MAX = size / 2 - size / 12;
 const MIN = size / 10;
 
+let rotate_angle = 0;
+let timeoutClock = null;
+
 var xClock = GObject.registerClass({
 	Properties : {},
 	Signals : {}
@@ -29,6 +32,17 @@ var xClock = GObject.registerClass({
 		this.reactive = true;
 		this.connect("motion-event", this.hover.bind(this));
 		this.connect("button-press-event", this.click.bind(this));
+
+		//~ let pt;
+		//~ pt = new Clutter.PropertyTransition({ property_name: 'rotation-angle-z' });
+		//~ pt.set_from(160);	//Clutter.Transition
+		//~ pt.set_to(0);
+		//~ pt.set_duration(1000);	//Clutter.Timeline
+		//~ pt.set_progress_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
+		//~ pt.set_progress_mode(Clutter.AnimationMode.LINEAR);
+		//~ this.actor.add_transition('rotate_transition', pt);
+
+	   	//~ pt.start();
 	}
 
 	get_alarm() {
@@ -62,13 +76,18 @@ var xClock = GObject.registerClass({
 	}
 
 	click(actor, event) {
-		if (!this.hover_degree) return Clutter.EVENT_PROPAGATE;
+		if(event.get_button() == 3){	//右键隐藏
+			this.visible = false;
+			return Clutter.EVENT_STOP;
+		}
+		//~ if (!this.hover_degree) return Clutter.EVENT_PROPAGATE;
 		if (!this.IsCenter)
 			this.alarm_degree = this.hover_degree;
 		else
 			this.alarm_active = !this.alarm_active;
 		if (this.alarm_active) {
 			[alarm_h, alarm_m] = this.degree2time(this.alarm_degree);
+			this.hover_degree = 0;
 		} else {
 			alarm_h = null;
 			alarm_m = null;
@@ -83,7 +102,11 @@ var xClock = GObject.registerClass({
 		//~ this.setcolor(ctx, shadow_color, 1);	//阴影
 		//~ ctx.setLineWidth (width+4);
 		//~ ctx.moveTo (0, 0); ctx.lineTo(0, len); ctx.stroke();
-		this.setcolor(ctx, color, 1); //指针颜色
+		//~ this.setcolor(ctx, color, this.hover_degree ? 0.5 : 1); //指针颜色
+		if(this.hover_degree){
+			ctx.setOperator(Cairo.Operator.OVER);
+			this.setcolor(ctx, color, 0.4); //指针颜色
+		} else this.setcolor(ctx, color, 1); //指针颜色
 		ctx.setLineWidth(width);
 		ctx.moveTo(0, 0);
 		ctx.lineTo(0, len);
@@ -124,7 +147,7 @@ var xClock = GObject.registerClass({
 
 		ctx.setOperator(Cairo.Operator.CLEAR);
 		ctx.paint();
-		ctx.setOperator(Cairo.Operator.OVER);
+		//~ ctx.setOperator(Cairo.Operator.OVER);
 
 		//~ ctx.selectFontFace("Sans Bold 27", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
 		//~ Seems all font class in cairo are disable.
@@ -132,6 +155,10 @@ var xClock = GObject.registerClass({
 		ctx.translate(size / 2, size / 2); //窗口中心为坐标原点。
 		ctx.setLineCap(Cairo.LineCap.ROUND);
 		ctx.setOperator(Cairo.Operator.SOURCE);
+
+		if(timeoutClock){
+			ctx.rotate(rotate_angle*(Math.PI/180));
+		}
 
 		this.setcolor(ctx, back_color, 0.8); //底色
 		ctx.arc(0, 0, size / 2 - size / 20, 0, 2 * Math.PI);
@@ -151,12 +178,12 @@ var xClock = GObject.registerClass({
 			ctx.moveTo(0, -MAX);
 			if (i % 5 == 0) {
 				if (i % 15 == 0) {
-					ctx.setOperator(Cairo.Operator.SOURCE);
+					//~ ctx.setOperator(Cairo.Operator.SOURCE);
 					this.setcolor(ctx, hand_color, 1);
 					this.align_show(ctx, (i / 5).toString());
 					ctx.setLineWidth(size / 30);
 				} else {
-					ctx.setOperator(Cairo.Operator.ATOP);
+					//~ ctx.setOperator(Cairo.Operator.ATOP);
 					this.setcolor(ctx, back_color, 1);
 					ctx.setLineWidth(size / 50);
 				}
@@ -191,13 +218,14 @@ var xClock = GObject.registerClass({
 			ctx.moveTo(0, size / 7);
 			this.align_show(ctx, '%02s : %02s'.format(h0, m0), "DejaVuSerif Bold 24");
 		}
-		if (this.alarm_active) {
-			this.setcolor(ctx, 'blue', 1);
-			ctx.moveTo(0, -size / 5);
-			this.align_show(ctx, '%02s : %02s'.format(alarm_h, alarm_m), "DejaVuSerif Bold 24");
-		}
+
+		this.setcolor(ctx, this.alarm_active ? 'blue' : 'dark gray', 1);
+		ctx.moveTo(0, -size / 5);
+		const [ah, am] = this.degree2time(this.alarm_degree);
+		this.align_show(ctx, '%02s : %02s'.format(ah, am), "DejaVuSerif Bold 24");
 
 		ctx.moveTo(0, 0);
+		//~ ctx.setOperator (Cairo.Operator.DEST_OVER);
 		this.draw_line(ctx, "white", size / 25, this.alarm_degree * Math.PI / 180, -Math.floor(size / 4)); //闹铃，30度1小时
 		this.draw_line(ctx, hand_color, size / 20, (h0 * 30 + m0 * 30 / 60) * (Math.PI / 180), -Math.floor(size / 3.7)); //时针，30度1小时
 		this.draw_line(ctx, hand_color, size / 33, m0 * 6 * (Math.PI / 180), -Math.floor(size / 2.7)); //分针，6度1分钟
@@ -215,5 +243,27 @@ var xClock = GObject.registerClass({
 		const ah = parseInt(at / 60);
 		const am = parseInt((at - ah * 60) / 5) * 5;
 		return [ ah, am ];
-	};
+	}
+
+	swing() {
+		if(timeoutClock) return; 	//不能重入。
+		const cos_a = [0.2588,0.5,0.7071,0.866,0.966,1,  1,0.966,0.866,0.7071,0.5,0.2588];	//cos函数 0-75度,+15递增
+		let cnt = 6;				//查表循环计数
+		let direct = 1;				//顺时钟为1
+		let max_angle = 10;			//每周期递减的最大角度，递减表现为阻尼。
+
+		timeoutClock = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
+			if(max_angle==0) {	//停止条件
+				GLib.Source.remove(timeoutClock);
+				timeoutClock = null;
+			}
+			rotate_angle += direct*(max_angle*cos_a[cnt]);
+			if((cnt==cos_a.length-1 && direct==1) || (cnt==0 && direct==-1)) {direct=direct==1?-1:1; max_angle--;}
+			else cnt+=direct;	// 转向时，停止一次变动，更加柔和。
+			//~ log("rotate_angle: "+rotate_angle+" direct: "+direct+" max_angle: "+max_angle+" cnt: "+cnt);
+			this._canvas.invalidate();
+			return GLib.SOURCE_CONTINUE;
+		});
+	}
+
 });
