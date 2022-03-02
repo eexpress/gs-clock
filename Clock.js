@@ -67,6 +67,8 @@ var xClock = GObject.registerClass({
 	click(actor, event) {
 		if (event.get_button() == 3) { //右键隐藏
 			this.visible = false;
+			this.hover_degree = 0;
+			this._canvas.invalidate();
 			return Clutter.EVENT_STOP;
 		}
 		if (!this.IsCenter)
@@ -97,7 +99,7 @@ var xClock = GObject.registerClass({
 		ctx.lineTo(0, len);
 		ctx.stroke();
 		if (color == "white") {
-			this.setcolor(ctx, 'red', 1);
+			this.setcolor(ctx, this.alarm_active ? 'blue' : 'red', 1);
 			ctx.arc(0, len, width / 2 * 0.6, 0, 2 * Math.PI);
 			ctx.fill();
 		}
