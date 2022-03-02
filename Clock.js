@@ -202,7 +202,8 @@ var xClock = GObject.registerClass({
 			this.align_show(ctx, '%02s : %02s'.format(h0, m0), "DejaVuSerif Bold 24");
 		}
 
-		this.setcolor(ctx, this.alarm_active ? 'blue' : 'dark gray', 1);
+		this.setcolor(ctx, this.alarm_active ? 'blue' : 'dimgray', 1);
+		// *gray show white. darkgreen show green. strange.
 		ctx.moveTo(0, -size / 5);
 		const [ah, am] = this.degree2time(this.alarm_degree);
 		this.align_show(ctx, '%02s : %02s'.format(ah, am), "DejaVuSerif Bold 24");
@@ -248,5 +249,12 @@ var xClock = GObject.registerClass({
 			this._canvas.invalidate();
 			return GLib.SOURCE_CONTINUE;
 		});
+	}
+
+	destroy() {
+		if (timeoutClock) {
+			GLib.Source.remove(timeoutClock);
+			timeoutClock = null;
+		}
 	}
 });
