@@ -20,6 +20,7 @@ const xClock = Me.imports.Clock.xClock;
 const size = 400;
 let xc = null;
 let pop_per_hour = false; //整点弹出报时。
+let pt = null;
 
 const Indicator = GObject.registerClass(
 	class Indicator extends PanelMenu.Button {
@@ -54,9 +55,24 @@ const Indicator = GObject.registerClass(
 				const [x, y] = global.get_pointer();
 				xc.set_position(x - size / 2 + 10, y + 30);
 				xc.visible = !xc.visible;
+				if (xc.visible) this.pt();
+
 				return Clutter.EVENT_STOP;
 			});
 		}
+
+		pt(){
+			const pn = ['rotation-angle-x', 'rotation-angle-y', 'rotation-angle-z'];
+			const pname = pn[Math.floor(Math.random() * 12) % pn.length];
+			pt = new Clutter.PropertyTransition({ property_name: pname, remove_on_complete: true });
+			pt.set_from(180);	//Clutter.Transition
+			pt.set_to(0);
+			pt.set_duration(300);	//Clutter.Timeline
+			pt.set_progress_mode(Clutter.AnimationMode.LINEAR);
+		//~ https://gjs-docs.gnome.org/clutter9~9_api/clutter.animationmode
+			xc.add_transition(pname, pt);
+			pt.start();
+		};
 
 		alarm() {
 			const player = global.display.get_sound_player();
