@@ -61,15 +61,15 @@ const Indicator = GObject.registerClass(
 			});
 		}
 
-		pt(){
-			const pn = ['rotation-angle-x', 'rotation-angle-y', 'rotation-angle-z'];
+		pt() {
+			const pn = [ 'rotation-angle-x', 'rotation-angle-y', 'rotation-angle-z' ];
 			const pname = pn[Math.floor(Math.random() * 12) % pn.length];
-			pt = new Clutter.PropertyTransition({ property_name: pname, remove_on_complete: true });
-			pt.set_from(180);	//Clutter.Transition
+			pt = new Clutter.PropertyTransition({ property_name : pname, remove_on_complete : true });
+			pt.set_from(180); // Clutter.Transition
 			pt.set_to(0);
-			pt.set_duration(300);	//Clutter.Timeline
+			pt.set_duration(300); // Clutter.Timeline
 			pt.set_progress_mode(Clutter.AnimationMode.LINEAR);
-		//~ https://gjs-docs.gnome.org/clutter9~9_api/clutter.animationmode
+			//~ https://gjs-docs.gnome.org/clutter9~9_api/clutter.animationmode
 			xc.add_transition(pname, pt);
 			pt.start();
 		};
@@ -111,7 +111,7 @@ class Extension {
 			if (pop_per_hour) { //整点弹出报时
 				const s0 = d0.getSeconds();
 				if (m0 == 0 && s0 < 10)
-				//~ if(s0 < 10)//1分钟测试用
+					//~ if(s0 < 10)//1分钟测试用
 					this._indicator.alarm();
 			}
 			return GLib.SOURCE_CONTINUE;
