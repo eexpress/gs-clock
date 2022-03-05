@@ -9,6 +9,7 @@ const MIN = size / 10;
 
 let rotate_angle = 0;
 let timeoutClock = null;
+//~ let effect = 0;
 
 var xClock = GObject.registerClass(
 	{
@@ -108,7 +109,7 @@ var xClock = GObject.registerClass(
 			ctx.restore(); //消除旋转的角度
 		}
 
-		align_show(ctx, showtext, font = "Sans Bold 20") {
+		align_show(ctx, showtext, font = "DejaVuSerif Bold 20") {
 			// API没有绑定这个函数。 Cairo.TextExtents is not a constructor
 			//~ https://gitlab.gnome.org/GNOME/gjs/-/merge_requests/720
 			//~ let ex = new Cairo.TextExtents();
@@ -145,7 +146,13 @@ var xClock = GObject.registerClass(
 			ctx.setOperator(Cairo.Operator.SOURCE);
 
 			if (timeoutClock) {
-				ctx.rotate(rotate_angle * (Math.PI / 180));
+				const radian = rotate_angle * (Math.PI / 180);
+				//~ if (effect == 1)
+				//~ ctx.scale(1, Math.cos(radian));
+				//~ else if (effect == 2)
+				//~ ctx.scale(Math.cos(radian), 1);
+				//~ else
+				ctx.rotate(radian);
 			}
 
 			this.setcolor(ctx, back_color, 0.8); //底色
@@ -182,7 +189,7 @@ var xClock = GObject.registerClass(
 			ctx.restore();
 
 			const d0 = new Date(); //时间
-			const h0 = d0.getHours();
+			let h0 = d0.getHours();
 			const m0 = d0.getMinutes();
 
 			if (this.hover_degree && !this.alarm_active) {
@@ -199,16 +206,24 @@ var xClock = GObject.registerClass(
 				const [ah, am] = this.degree2time(this.hover_degree);
 				this.align_show(ctx, '%02s : %02s'.format(ah, am));
 			} else {
+				const ampm = "PM";
+				if (h0 >= 12) {
+					h0 -= 12;
+				} else {
+					ampm = "AM";
+				}
 				this.setcolor(ctx, 'black', 1);
-				ctx.moveTo(0, size / 7);
-				this.align_show(ctx, '%02s : %02s'.format(h0, m0), "DejaVuSerif Bold 24");
+				ctx.moveTo(0, size / 6);
+				this.align_show(ctx, '%02s : %02s'.format(h0, m0));
+				ctx.moveTo(0, size / 12);
+				this.align_show(ctx, ampm);
 			}
 
 			this.setcolor(ctx, this.alarm_active ? 'blue' : 'dimgray', 1);
 			// *gray show white. darkgreen show green. strange.
 			ctx.moveTo(0, -size / 5);
 			const [ah, am] = this.degree2time(this.alarm_degree);
-			this.align_show(ctx, '%02s : %02s'.format(ah, am), "DejaVuSerif Bold 24");
+			this.align_show(ctx, '%02s : %02s'.format(ah, am));
 
 			ctx.moveTo(0, 0);
 			this.draw_line(ctx, "white", size / 25, this.alarm_degree * Math.PI / 180, -Math.floor(size / 4)); //闹铃，30度1小时
@@ -236,6 +251,7 @@ var xClock = GObject.registerClass(
 			let cnt = 6; //查表循环计数
 			let direct = 1; //顺时钟为1
 			let max_angle = 10; //每周期递减的最大角度，递减表现为阻尼。
+			//~ effect = Math.floor(Math.random() * 3);
 
 			timeoutClock = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
 				if (max_angle == 0) { //停止条件
