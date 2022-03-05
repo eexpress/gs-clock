@@ -207,11 +207,9 @@ var xClock = GObject.registerClass(
 				this.align_show(ctx, '%02s : %02s'.format(ah, am));
 			} else {
 				const ampm = "PM";
-				if (h0 >= 12) {
-					h0 -= 12;
-				} else {
-					ampm = "AM";
-				}
+				if (h0 >= 12) h0 -= 12;
+				else ampm = "AM";
+
 				this.setcolor(ctx, 'black', 1);
 				ctx.moveTo(0, size / 6);
 				this.align_show(ctx, '%02s : %02s'.format(h0, m0));
