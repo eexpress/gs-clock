@@ -55,13 +55,13 @@ const Indicator = GObject.registerClass(
 				const [x, y] = global.get_pointer();
 				xc.set_position(x - size / 2 + 10, y + 30);
 				xc.visible = !xc.visible;
-				if (xc.visible) this.pt();
+				if (xc.visible) this.pteffect();
 
 				return Clutter.EVENT_STOP;
 			});
 		}
 
-		pt() {
+		pteffect() {
 			const pn = [ 'rotation-angle-x', 'rotation-angle-y', 'rotation-angle-z' ];
 			const pname = pn[Math.floor(Math.random() * 12) % pn.length];
 			pt = new Clutter.PropertyTransition({ property_name : pname, remove_on_complete : true });
