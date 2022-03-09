@@ -55,26 +55,58 @@ const Indicator = GObject.registerClass(
 				const [x, y] = global.get_pointer();
 				xc.set_position(x - size / 2 + 10, y + 30);
 				xc.visible = !xc.visible;
-				if (xc.visible) this.pteffect();
-
+				if (xc.visible) this.pt_effect(); else this.ease_effect(xc);
+				//~ this.ease_effect(xc);
 				return Clutter.EVENT_STOP;
 			});
 		}
 
-		pteffect() {
-			const pn = [ 'rotation-angle-x', 'rotation-angle-y', 'rotation-angle-z' ];
+		ease_effect(a){	//直线位置动画，AnimationMode 只是时间间隔的变化。
+			let monitor = Main.layoutManager.primaryMonitor;
+			let newX, newO;
+			const isV = a.visible;
+			const [px, py] = global.get_pointer();
+			if (isV) {	//从屏幕左侧到鼠标点击下方出现。
+				a.set_position(0, py + 30);
+				newX = px - size / 2 + 10;
+				a.opacity = 10;
+				newO = 255;
+			}else{	//从当前位置到屏幕右侧消失。
+				newX =  monitor.width-size ;
+				newO = 10;
+				a.visible = true;	//强制显示，以产生动态。
+			}
+
+			a.ease({
+			  x: newX,
+			  opacity: newO,
+			  duration: 1000,
+			  mode: Clutter.AnimationMode.EASE_OUT_BOUNCE,
+			  onComplete: () => {
+				if(!isV) a.visible = false;	//恢复应该的状态。
+	  			xc.opacity = 255;	//及时恢复透明度。
+			  }
+			});
+		};
+
+		pt_effect() {	//曲线动画。
+			//~ const pn = [ 'rotation-angle-x', 'rotation-angle-y', 'rotation-angle-z' ];
+			const pn = [ 'rotation-angle-x', 'rotation-angle-z' ];
 			const pname = pn[Math.floor(Math.random() * 12) % pn.length];
 			pt = new Clutter.PropertyTransition({ property_name : pname, remove_on_complete : true });
 			pt.set_from(180); // Clutter.Transition
 			pt.set_to(0);
 			pt.set_duration(300); // Clutter.Timeline
 			pt.set_progress_mode(Clutter.AnimationMode.LINEAR);
-			//~ https://gjs-docs.gnome.org/clutter9~9_api/clutter.animationmode
 			xc.add_transition(pname, pt);
 			pt.start();
 		};
 
 		alarm() {
+			// 因为有动画变换位置，所以强制恢复。
+			const [px, py] = global.get_pointer();
+			xc.set_position(px - size / 2 + 10, py + 30);
+
 			const player = global.display.get_sound_player();
 			player.play_from_theme('complete', 'countdown', null);
 			xc.visible = true;
