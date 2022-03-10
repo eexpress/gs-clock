@@ -61,30 +61,34 @@ const Indicator = GObject.registerClass(
 
 		ease_effect(a) {  //直线位置动画，AnimationMode 只是时间间隔的变化。
 			let monitor = Main.layoutManager.primaryMonitor;
-			let newX, newO;
+			let newX, newO, newS;
 			const isV	   = a.visible;
 			const [px, py] = global.get_pointer();
 			if (isV) {	//从屏幕左侧到鼠标点击下方出现。
 				a.set_scale(0.1, 0.1);
-				a.set_position(monitor.width / 2, py + 30);
+				//~ a.set_position(monitor.width / 2, py + 30);
+				a.set_pivot_point(0.5, 0.5);
 				newX			   = px - size / 2 + 10;
 				a.opacity		   = 10;
 				newO			   = 255;
-				a.rotation_angle_z = 180;
+				a.rotation_angle_z = 360;
+				newS			   = 1;
 			} else {  //从当前位置到屏幕右侧消失。
-				newX	  = monitor.width - size;
+				newS	  = 0.4;
+				newX	  = monitor.width - size * newS;
 				newO	  = 10;
 				a.visible = true;  //强制显示，以产生动态。
 			}
 
 			a.ease({
 				x : newX,
-				scale_x : 1,
-				scale_y : 1,
+				scale_x : newS,
+				scale_y : newS,
 				opacity : newO,
 				rotation_angle_z : 0,
 				duration : 1000,
 				mode : Clutter.AnimationMode.EASE_OUT_BOUNCE,
+				//~ exponentially decaying parabolic (bounce) 指数衰减抛物线（反弹）
 				onComplete : () => {
 					if (!isV) a.visible = false;  //恢复应该的状态。
 					a.opacity = 255;  //及时恢复透明度。
