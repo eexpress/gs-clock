@@ -48,6 +48,7 @@ var xClock = GObject.registerClass(
 			const Y		  = y0 - size / 2;
 			const distant = Math.sqrt(X * X + Y * Y);
 			if (distant > MAX) {
+				this.IsCenter = false;
 				this.hover_degree = 0;
 				this._canvas.invalidate();
 				return false;
@@ -61,7 +62,7 @@ var xClock = GObject.registerClass(
 		}
 
 		hover(actor, event) {
-			if (!this.get_coords() || this.alarm_active) return Clutter.EVENT_PROPAGATE;
+			if (!this.get_coords() || this.alarm_active) return Clutter.EVENT_STOP;
 			this._canvas.invalidate();
 			return Clutter.EVENT_STOP;
 		}
@@ -205,7 +206,7 @@ var xClock = GObject.registerClass(
 				const [ah, am] = this.degree2time(this.hover_degree);
 				this.align_show(ctx, '%02s : %02s'.format(ah, am));
 			} else {
-				const ampm = "PM";
+				let ampm = "PM";
 				if (h0 >= 12) h0 -= 12;
 				else ampm = "AM";
 
