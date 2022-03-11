@@ -61,30 +61,29 @@ const Indicator = GObject.registerClass(
 
 		ease_effect(a) {  //直线位置动画，AnimationMode 只是时间间隔的变化。
 			let monitor = Main.layoutManager.primaryMonitor;
-			let newX, newO, newS;
+			let newX, newOpacity, newScale;
 			const isV	   = a.visible;
-			const [px, py] = global.get_pointer();
-			if (isV) {	//从屏幕左侧到鼠标点击下方出现。
+			const [px, py] = a.get_position();
+			if (isV) {	//出现。
 				a.set_scale(0.1, 0.1);
-				//~ a.set_position(monitor.width / 2, py + 30);
-				a.set_pivot_point(0.5, 0.5);
-				newX			   = px - size / 2 + 10;
-				a.opacity		   = 10;
-				newO			   = 255;
+				a.set_pivot_point(0.5, 0.5);  //旋转等的中心
 				a.rotation_angle_z = 360;
-				newS			   = 1;
-			} else {  //从当前位置到屏幕右侧消失。
-				newS	  = 0.4;
-				newX	  = monitor.width - size * newS;
-				newO	  = 10;
-				a.visible = true;  //强制显示，以产生动态。
+				a.opacity		   = 10;
+				newX			   = px;
+				newOpacity		   = 255;
+				newScale		   = 1;
+			} else {  //消失。
+				newOpacity = 10;
+				newScale   = 0.4;
+				newX	   = monitor.width - size * newScale;
+				a.visible  = true;	//强制显示，以产生动态。
 			}
 
 			a.ease({
 				x : newX,
-				scale_x : newS,
-				scale_y : newS,
-				opacity : newO,
+				scale_x : newScale,
+				scale_y : newScale,
+				opacity : newOpacity,
 				rotation_angle_z : 0,
 				duration : 1000,
 				mode : Clutter.AnimationMode.EASE_OUT_BOUNCE,
@@ -92,15 +91,15 @@ const Indicator = GObject.registerClass(
 				onComplete : () => {
 					if (!isV) a.visible = false;  //恢复应该的状态。
 					a.opacity = 255;  //及时恢复透明度。
+					a.set_scale(1, 1);	//恢复比率，否则闹钟变小。
+					a.set_position(px, py);	 //恢复位置，否则闹钟乱跑。
+					Main.layoutManager._queueUpdateRegions();
+					//改变scale，导致鼠标穿越。强制刷新。Simon says.
 				}
 			});
 		};
 
 		alarm() {
-			// 因为有动画变换位置，所以强制恢复。
-			const [px, py] = global.get_pointer();
-			xc.set_position(px - size / 2 + 10, py + 30);
-
 			const player = global.display.get_sound_player();
 			player.play_from_theme('complete', 'countdown', null);
 			xc.visible = true;
