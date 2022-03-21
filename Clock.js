@@ -42,7 +42,7 @@ var xClock = GObject.registerClass(
 
 		get_coords() {
 			const [x, y]	   = global.get_pointer();
-			const [op, x0, y0] = this.transform_stage_point(x, y);
+			const [op, x0, y0] = this.transform_stage_point(x, y);	//屏幕位置相对于actor的位置
 			if (!op) return false;
 			const X		  = x0 - size / 2;
 			const Y		  = y0 - size / 2;
