@@ -28,7 +28,7 @@ const Indicator = GObject.registerClass(
 			super._init(0.0, _('Cairo Clock'));
 
 			this.add_child(new St.Icon({
-				icon_name : 'gnome-panel-clock',
+				icon_name : 'org.gnome.clocks-symbolic',	//fedora 36 & ubuntu 22.04
 				style_class : 'system-status-icon',
 			}));
 
