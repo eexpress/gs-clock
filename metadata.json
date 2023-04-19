@@ -5,6 +5,10 @@
   "gettext-domain": "cairo-clock",
   "url": "https://github.com/eexpress/gnome-shell-cairo",
   "shell-version": [
-    "40","41","42"
+    "40",
+    "41",
+    "42",
+    "43",
+    "44"
   ]
 }
