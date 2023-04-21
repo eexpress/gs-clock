@@ -38,13 +38,13 @@ const Indicator = GObject.registerClass(
 			xc.reactive = true;
 
 			this.width			  = 50;
-			this.background_color = Clutter.Color.from_string("gray")[1];
+			this.background_color = Clutter.Color.from_string("#80808000")[1];
 			this.connect("button-press-event", (actor, event) => {
 				const altkey  = event.get_state() & Clutter.ModifierType.MOD1_MASK;
 				const ctrlkey = event.get_state() & Clutter.ModifierType.CONTROL_MASK;
 				if (altkey) {
 					pop_per_hour		  = !pop_per_hour;
-					this.background_color = Clutter.Color.from_string(pop_per_hour ? "green" : "gray")[1];
+					this.background_color = Clutter.Color.from_string(pop_per_hour ? "#C98A38" : "#80808000")[1];
 					return Clutter.EVENT_STOP;
 				}
 				if (ctrlkey) {
