@@ -4,8 +4,8 @@ const Cairo		 = imports.cairo;
 let size		 = 400;
 let alarm_h		 = null;
 let alarm_m		 = null;
-const MAX		 = size / 2 - size / 12;
-const MIN		 = size / 10;
+let MAX		 = size / 2 - size / 12;
+let MIN		 = size / 10;
 let rotate_angle = 0;
 let timeoutClock = null;
 //~ let effect = 0;
@@ -20,6 +20,8 @@ var xClock = GObject.registerClass(
 			super._init();
 
 			if (x) size = x;
+			MAX		 = size / 2 - size / 12;
+			MIN		 = size / 10;
 			this.hover_degree = 0;
 			this.alarm_degree = 0;
 			this.IsCenter	  = false;
@@ -109,7 +111,7 @@ var xClock = GObject.registerClass(
 			ctx.restore();	//消除旋转的角度
 		}
 
-		align_show(ctx, showtext, font = "DejaVuSerif Bold 16") {
+		align_show(ctx, showtext, font = "DejaVuSerif Bold " + parseInt(size/25)) {
 			// API没有绑定这个函数。 Cairo.TextExtents is not a constructor
 			//~ https://gitlab.gnome.org/GNOME/gjs/-/merge_requests/720
 			//~ let ex = new Cairo.TextExtents();

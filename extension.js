@@ -17,7 +17,7 @@ function lg(s) {
 }
 
 const xClock	 = Me.imports.Clock.xClock;
-const size		 = 400;
+const size	 = parseInt(Main.layoutManager.primaryMonitor.height/4);
 let xc			 = null;
 let pop_per_hour = false;  //整点弹出报时。
 let pt			 = null;
@@ -32,7 +32,7 @@ const Indicator = GObject.registerClass(
 				style_class : 'system-status-icon',
 			}));
 
-			xc = new xClock(400);
+			xc = new xClock(size);
 			Main.layoutManager.addChrome(xc);
 			xc.visible	= false;
 			xc.reactive = true;
